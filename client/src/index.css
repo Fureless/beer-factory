@@ -1,0 +1,74 @@
+@import "~materialize-css/dist/css/materialize.min.css";
+
+body {
+    background: #fafafa;
+}
+
+input.auth-input {
+    border-bottom: 1px solid #fff !important;
+    box-shadow: 0 1px 0 0 #fff !important;
+}
+
+input.auth-input:focus {
+    border-bottom: 1px solid #388e3c !important;
+    box-shadow: 0 1px 0 0 #388e3c !important;
+}
+
+input.auth-input + label {
+    color: #fff !important;
+}
+
+input.auth-input:focus + label {
+    color: #388e3c !important;
+}
+
+nav ul a:hover {
+    background-color: rgba(0,0,0,1);
+}
+
+.logo {
+    font-family: 'Rowdies', cursive;
+}
+
+.show-container { animation: show .5s;
+}
+
+/*::-webkit-scrollbar {*/
+/*    width: 0;*/
+/*}*/
+
+html {
+    overflow-x: hidden;
+    margin-right: calc(-1 * (100vw - 100%));
+}
+
+::-webkit-scrollbar {
+    width: 5px;
+}
+
+::-webkit-scrollbar-track {
+    -webkit-box-shadow: 5px 5px 5px -5px rgba(34, 60, 80, 0.2) inset;
+    background-color: #f9f9fd;
+}
+
+::-webkit-scrollbar-thumb {
+    background: linear-gradient(225deg, rgb(0, 0, 0) 40%, rgb(73, 73, 73) 60%);
+}
+
+@keyframes show {
+    from {opacity: 0;} to {opacity: 1;}
+}
+
+/*test*/
+.grow {
+    -webkit-transition: all 0.3s ease;
+    -moz-transition: all 0.3s ease;
+    -o-transition: all 0.3s ease;
+    transition: all 0.3s ease;
+}
+
+.grow:hover {
+    -webkit-transform: scale(1.01);
+    -ms-transform: scale(1.01);
+    transform: scale(1.01);
+}
