@@ -2,7 +2,7 @@ const {Router} = require('express')
 const router = Router()
 const auth = require('../middleware/auth.middleware')
 
-const {getOrders, getCustomerId, createOrder, changeStatus} = require('../tedious/tedious')
+const {getOrders, getCustomerId, createOrder, changeStatus, changeWorker, deleteOrder} = require('../tedious/tedious')
 
 // api/orders
 router.get(
@@ -13,11 +13,6 @@ router.get(
                 res.json({result})
             })
 
-            // getCustomerId(req.user.userId, idCustomer => {
-            //     getCustomerOrders(idCustomer, result => {
-            //         res.json({result})
-            //     })
-            // })
         } catch (e) {
             res.status(500).json({message: 'Что-то пошло не так, попробуйте снова'})
         }
@@ -42,9 +37,9 @@ router.post(
     }
 )
 
-// api/orders/status
+// api/orders/changeStatus
 router.post(
-    '/status', auth, async (req, res) => {
+    '/changeStatus', auth, async (req, res) => {
         try {
             const {idOrder, idStatus} = req.body
 
@@ -52,6 +47,38 @@ router.post(
             changeStatus(idOrder, idStatus)
 
             res.status(201).json({message: 'Заказ отменен/изменен'})
+        } catch (e) {
+            res.status(500).json({message: 'Что-то пошло не так, попробуйте снова'})
+        }
+    }
+)
+
+// api/orders/changeWorker
+router.post(
+    '/changeWorker', auth, async (req, res) => {
+        try {
+            const {idOrder, idWorker} = req.body
+
+            // ЗАПРОС
+            changeWorker(idOrder, idWorker)
+
+            res.status(201).json({message: 'Работник назначен'})
+        } catch (e) {
+            res.status(500).json({message: 'Что-то пошло не так, попробуйте снова'})
+        }
+    }
+)
+
+// api/orders/delete
+router.post(
+    '/delete', auth, async (req, res) => {
+        try {
+            const {idOrder} = req.body
+
+            // ЗАПРОС
+            deleteOrder(idOrder)
+
+            res.status(201).json({message: 'Заказ удалён'})
         } catch (e) {
             res.status(500).json({message: 'Что-то пошло не так, попробуйте снова'})
         }

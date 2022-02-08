@@ -43,18 +43,6 @@ export const AuthPage = () => {
                         <span className="card-title">Authorization</span>
                         <div>
 
-                            {/*<div className="input-field">*/}
-                            {/*    <input*/}
-                            {/*        id="email"*/}
-                            {/*        type="text"*/}
-                            {/*        name="email"*/}
-                            {/*        className="yellow-input"*/}
-                            {/*        value={form.email}*/}
-                            {/*        onChange={changeHandler}*/}
-                            {/*    />*/}
-                            {/*    <label htmlFor="email">Email</label>*/}
-                            {/*</div>*/}
-
                             <div className="input-field">
                                 <input
                                     id="login"
@@ -89,12 +77,7 @@ export const AuthPage = () => {
                             onClick={loginHandler}
                             disabled={loading}
                         >Login</button>
-                        {/*<button*/}
-                        {/*    className="btn grey lighten-1 black-text" */}
-                        {/*    //ОТКРЫТЬ РЕГИСТРАЦИЮ*/}
-                        {/*    onClick={openRegistration}*/}
-                        {/*    disabled={loading}*/}
-                        {/*>Register</button>*/}
+                        {/*Мб вместо ссылки кнопку сделать?*/}
                         <NavLink to="/registration">Register</NavLink>
                     </div>
                 </div>

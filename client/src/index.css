@@ -1,7 +1,19 @@
 @import "~materialize-css/dist/css/materialize.min.css";
+@import url('https://fonts.googleapis.com/css2?family=Rowdies:wght@300&display=swap');
+
+/*TODO ИСПРАВИТЬ ЗАМЫЛИВАНИЕ ПРИ SCALE*/
 
 body {
     background: #fafafa;
+}
+
+html {
+    overflow-x: hidden;
+    margin-right: calc(-1 * (100vw - 100%));
+}
+
+nav ul a:hover {
+    background-color: rgba(0,0,0,1);
 }
 
 input.auth-input {
@@ -22,12 +34,25 @@ input.auth-input:focus + label {
     color: #388e3c !important;
 }
 
-nav ul a:hover {
-    background-color: rgba(0,0,0,1);
-}
-
 .logo {
     font-family: 'Rowdies', cursive;
+}
+
+.grow {
+    -webkit-transition: all 0.3s ease;
+    -moz-transition: all 0.3s ease;
+    -o-transition: all 0.3s ease;
+    transition: all 0.3s ease;
+    /*-webkit-backface-visibility: hidden;*/
+    /*-webkit-transform-style: preserve-3d;*/
+}
+
+.grow:hover {
+    -webkit-transform: scale(1.01);
+    -ms-transform: scale(1.01);
+    transform: scale(1.01);
+    /*-webkit-backface-visibility: hidden;*/
+    /*-webkit-transform-style: preserve-3d;*/
 }
 
 .show-container { animation: show .5s;
@@ -36,11 +61,6 @@ nav ul a:hover {
 /*::-webkit-scrollbar {*/
 /*    width: 0;*/
 /*}*/
-
-html {
-    overflow-x: hidden;
-    margin-right: calc(-1 * (100vw - 100%));
-}
 
 ::-webkit-scrollbar {
     width: 5px;
@@ -57,18 +77,4 @@ html {
 
 @keyframes show {
     from {opacity: 0;} to {opacity: 1;}
-}
-
-/*test*/
-.grow {
-    -webkit-transition: all 0.3s ease;
-    -moz-transition: all 0.3s ease;
-    -o-transition: all 0.3s ease;
-    transition: all 0.3s ease;
-}
-
-.grow:hover {
-    -webkit-transform: scale(1.01);
-    -ms-transform: scale(1.01);
-    transform: scale(1.01);
 }

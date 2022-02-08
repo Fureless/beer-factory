@@ -29,7 +29,6 @@ export const Catalog = () => {
 
     const images = [bImg1, bImg2, bImg3, bImg4, bImg5, bImg6, bImg7, bImg8, bImg9, bImg10]
 
-
     // МОЖНО ВЫВОДИТЬ КОНКРЕТНУЮ ОШИБКУ
     useEffect(() => {
         message(error)
@@ -40,25 +39,20 @@ export const Catalog = () => {
         window.M.updateTextFields()
     }, [])
 
+    // А нужен ли пустой массив зависимостей? Почитать про хук
     useEffect(async () => {
         try {
             // TODO Effect callbacks are synchronous to prevent race conditions. Put the async function inside
             // TODO React Hook useEffect has missing dependencies: 'auth.token' and 'request'. Either include them or
             // TODO remove the dependency array
-            const data = await request('/api/catalog', 'GET', null, {Authorization: `Bearer ${auth.token}`})
-            setCatalog(data.result)
-            //console.log(data.result)
-            // setCatalog({
-            //     id: '',
-            //     color: '',
-            //     degree: '',
-            //     price: '',
-            //     isFiltration: ''
-            // })
+            const catalogData = await request('/api/catalog', 'GET', null, {Authorization: `Bearer ${auth.token}`})
+            setCatalog(catalogData.result)
+            // TODO проверить есть ли вообще каталог
         } catch (e) {
         }
     }, [])
 
+    // TODO FIX IT
     const [amount, setAmount] = useState(1)
 
     const createOrder = async idBeer => {
@@ -77,6 +71,7 @@ export const Catalog = () => {
         }, {Authorization: `Bearer ${auth.token}`})
         message(data.message)
     }
+    // TODO мб увеличить скорость "роста" карточек?
 
     // У каждого инпута должен быть свой айди
     // При вызове фунции онКлик на кнопке это значение должно передаваться в функцию
@@ -89,16 +84,22 @@ export const Catalog = () => {
                     <div className="row">
                         {catalog && catalog.map((item, index) => (
                             <div key={index} className="col s4 show-container">
-                                <div className="card" style={{marginTop: '4rem'}}>
+                                <div className="card grow hoverable" style={{marginTop: '4rem'}}>
                                     <div className="card-image">
                                         <img src={images[index]} alt='beer' height='250px' width='200px'/>
                                         <span className="card-title"
                                               style={{color: 'black'}}><strong>{item[1].value}</strong></span>
-                                        <button
-                                            className="btn-floating halfway-fab waves-effect waves-light green darken-1"
-                                            disabled={loading}
-                                            onClick={() => createOrder(item[0].value)}><i
-                                            className="material-icons">shopping_basket</i></button>
+                                        {
+                                            auth.userPosition === 'customer' ?
+                                                <button
+                                                    className="btn-floating halfway-fab waves-effect waves-light green darken-1"
+                                                    disabled={loading}
+                                                    onClick={() => createOrder(item[0].value)}>
+                                                    <i className="material-icons">shopping_basket</i>
+                                                </button>
+                                                :
+                                                null
+                                        }
                                     </div>
 
                                     <div className="card-content">
@@ -108,25 +109,35 @@ export const Catalog = () => {
                                         <p>Degree {item[4].value}</p>
                                         <p>IsFiltration {item[5].value}</p>
                                     </div>
-                                    <div style={{display: 'flex'}}>
-                                        <button onClick={() => {
-                                            setAmount(amount - 1)
-                                        }}>-
-                                        </button>
-                                        <div>{amount}</div>
-                                        <button onClick={() => {
-                                            setAmount(amount + 1)
-                                        }}>+
-                                        </button>
-                                    </div>
-                                    <input id="amount" type="number" onChange={e => setAmount(e.target.value)}/>
+
+                                    {
+                                        auth.userPosition === 'customer' ?
+                                            <>
+                                                <div style={{display: 'flex'}}>
+                                                    <button onClick={() => {
+                                                        setAmount(amount - 1)
+                                                    }}>-
+                                                    </button>
+                                                    <div>{amount}</div>
+                                                    <button onClick={() => {
+                                                        setAmount(amount + 1)
+                                                    }}>+
+                                                    </button>
+                                                </div>
+
+                                                <input id="amount" type="text"
+                                                       onChange={e => setAmount(e.target.value)}/>
+                                            </>
+                                            :
+                                            null
+                                    }
                                 </div>
                             </div>
                         ))}
 
                     </div>
                 </div>
-                <div className="col s1" style={{backgroundColor: 'lightGray'}}>1-columns</div>
+                <div className="col s1"/>
                 <div className="col s3">
                     <div className="row">
                         <div className="col s12">

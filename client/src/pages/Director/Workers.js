@@ -25,18 +25,15 @@ export const Workers = () => {
     }, [error, message, clearError])
 
     useEffect(() => {
-        window.M.updateTextFields()
-        //M.Modal.init(document.querySelectorAll('.modal'), {startingTop: '70%'})
-        M.Modal.init(document.querySelectorAll('.modal'), {startingTop: '70%'})
-    }, [])
-
-    useEffect(async () => {
-        try {
-            const data = await request('/api/workers', 'GET', null, {Authorization: `Bearer ${auth.token}`})
-            setWorkers(data.result)
-        } catch (e) {
+        const fetchData = async () => {
+            try {
+                const workersData = await request('/api/workers', 'GET', null, {Authorization: `Bearer ${auth.token}`})
+                setWorkers(workersData.result)
+                // TODO А ЕСЛИ НЕТ РАБОТНИКОВ?
+            } catch (e) {}
         }
-    }, [])
+        fetchData().then() // TODO WHAT?
+    }, [request, auth.token])
 
     const changeHandler = event => {
         setForm({...form, [event.target.name]: event.target.value})
@@ -50,19 +47,12 @@ export const Workers = () => {
         }
     }
 
-    // test
-
-    const [testIdx, setTestIdx] = useState(false)
-
-    const test = idx => {
-        setTestIdx(idx)
-        console.log(workers[idx][2].value)
-        // По нажатию на кнопку меняем state
-        // open()
-        // Используем индекс из state
-    }
-
-    // test
+    useEffect(() => {
+        const elems = document.querySelectorAll('.modal')
+        M.Modal.init(elems, {})
+        // options : {startingTop: '70%'})
+        // M.AutoInit()
+    }, [])
 
     // TODO НЕ РЕНДЕРИТЬ ДИРЕКТОРА
     return (
@@ -76,7 +66,7 @@ export const Workers = () => {
                                     <div className="card-image">
                                         <button
                                             className="btn-floating modal-trigger halfway-fab waves-effect waves-light blue darken-1"
-                                            data-target="editWorker"
+                                            data-target="worker-edit"
                                             disabled={loading}
                                             onClick={() => test(index)}
                                         >
@@ -85,10 +75,6 @@ export const Workers = () => {
                                     </div>
 
                                     <div className="card-content hoverable">
-                                        {/*<p>IdOrder {item[0].value}</p>*/}
-                                        {/*<p>IdBeer {item[1].value}</p>*/}
-                                        {/*<p>IdCustomer {item[2].value}</p>*/}
-                                        {/*<p>IdWorker {item[3].value}</p>*/}
                                         <p>Name: <strong>{worker[2].value}</strong></p>
                                         <p>Number: <strong>{worker[3].value}</strong></p>
                                         <p>Email: <strong>{worker[4].value}</strong></p>
@@ -125,10 +111,9 @@ export const Workers = () => {
                     </button>
                 </div>
 
-
-                <div id="editWorker" className="modal card">
+                <div id="worker-edit" className="modal card">
                     <div className="modal-content">
-                        {workers && <h1>{workers[0][2].value}</h1>}
+                        {workers && <h1>Hello</h1>}
                     </div>
                 </div>
 
@@ -200,7 +185,7 @@ export const Workers = () => {
                                             disabled={loading}
                                         >Register
                                         </button>
-                                        <a className="modal-close waves-effect waves-teal btn-flat">Close</a>
+                                        {/*<a className="modal-close waves-effect waves-teal btn-flat">Close</a>*/}
                                     </form>
                                 </div>
                             </div>

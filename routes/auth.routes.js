@@ -5,7 +5,7 @@ const jwt = require('jsonwebtoken')
 const {check, validationResult} = require('express-validator')
 const router = Router()
 
-const {findOne, getIdUser, getPosition, createUser} = require('../tedious/tedious')
+const {findLogin, getIdUser, getPosition, createUser} = require('../tedious/tedious')
 
 // TODO Сделать валидацию
 // /api/auth/register
@@ -43,7 +43,7 @@ router.post(
             //         res.status(201).json({message: 'Пользователь создан'})
             // })
 
-            findOne(`${login}`, candidate => {
+            findLogin(`${login}`, candidate => {
                 if (candidate === 'have') {
                     res.status(400).json({message: 'Пользователь с таким логином уже существует'})
                 } else {
@@ -57,7 +57,6 @@ router.post(
 
             //res.status(201).json({message: 'Пользователь создан'})
 
-
             //const hashedPassword = await bcrypt.hash(password, 12)
 
             // ЗДЕСЬ МЫ СОЗДАЕМ ТАКОГО ЮЗЕРА В БД
@@ -67,8 +66,6 @@ router.post(
             //await user.save()
 
             //res.status(201).json({message: 'Пользователь создан'})
-
-
         } catch (e) {
             res.status(500).json({message: 'Что-то пошло не так, попробуйте снова'})
         }
@@ -90,7 +87,7 @@ router.post('/login',
                 })
             }
 
-            const {firstName, lastName, login, password, email, phone, date} = req.body
+            const {login, password} = req.body
 
             getIdUser(`${login}`, `${password}`, (result, isDirector) => {
                 if (isDirector) {
@@ -151,7 +148,6 @@ router.post('/login',
             // )
             //
             // res.json({token, userId: user.id})
-
         } catch (e) {
             res.status(500).json({message: 'Что-то пошло не так, попробуйте снова'})
         }

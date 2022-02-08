@@ -16,6 +16,7 @@ export const Profile = () => {
         lastName: '',
         email: '',
         phone: '',
+        date: '',
         salary: ''
     })
 
@@ -29,40 +30,38 @@ export const Profile = () => {
         window.M.updateTextFields()
     }, [])
 
+    // Почему только имя
     const changeHandler = event => {
         setForm({...form, [event.target.name]: event.target.value})
     }
 
-    // useEffect(() => {
-    //     const getCustomerData = async idUser => {
-    //         try {
-    //             const data = await request(`/api/profile`, 'GET', null, {Authorization: `Bearer ${auth.token}`})
-    //             setForm({
-    //                 firstName: data.result[0][2].value.split(' ')[1],
-    //                 lastName: data.result[0][2].value.split(' ')[0],
-    //                 email: data.result[0][3].value,
-    //                 phone: data.result[0][4].value,
-    //                 date: data.result[0][5].value.slice(0, 10)
-    //             })
-    //         } catch (e) {
-    //         }
-    //     }
-    //     // TODO Promise returned from getCustomerData is ignored
-    //     getCustomerData(auth.userId)
-    // }, [])
-    useEffect(async () => {
-        try {
-            const data = await request(`/api/profile`, 'GET', null, {Authorization: `Bearer ${auth.token}`})
-            setForm({
-                firstName: data.result[0][2].value.split(' ')[1],
-                lastName: data.result[0][2].value.split(' ')[0],
-                email: data.result[0][4].value,
-                phone: data.result[0][3].value,
-                salary: data.result[0][5].value
-            })
-        } catch (e) {
+    useEffect(() => {
+        const fetchData = async () => {
+            try {
+                const userData = await request(`/api/profile`, 'GET', null, {Authorization: `Bearer ${auth.token}`})
+                if (auth.userPosition === 'customer') {
+                    setForm({
+                        firstName: userData.result[0][2].value.split(' ')[1],
+                        lastName: userData.result[0][2].value.split(' ')[0],
+                        email: userData.result[0][3].value,
+                        phone: userData.result[0][4].value,
+                        date: userData.result[0][5].value.slice(0, 10)
+                    })
+                } else {
+                    // TODO ПРОВЕРИТЬ WARNING
+                    setForm({
+                        firstName: userData.result[0][2].value.split(' ')[1],
+                        lastName: userData.result[0][2].value.split(' ')[0],
+                        email: userData.result[0][4].value,
+                        phone: userData.result[0][3].value,
+                        salary: userData.result[0][5].value
+                    })
+                }
+            } catch (e) {
+            }
         }
-    }, [])
+        fetchData().then() // TODO WHAT?
+    }, [request, auth.token, auth.userPosition])
 
     const editUserProfile = async () => {
         const data = await request('/api/profile/edit', 'POST', {...form}, {Authorization: `Bearer ${auth.token}`})
@@ -109,11 +108,25 @@ export const Profile = () => {
                                        className="profile-input validate" value={form.phone} onChange={changeHandler}/>
                                 <label htmlFor="phone">Phone</label>
                             </div>
-                            <div className="input-field col s6">
-                                <input id="salary" type="number" name="salary" placeholder="salary"
-                                       className="profile-input validate" value={form.salary} onChange={changeHandler}/>
-                                <label htmlFor="date">Salary</label>
-                            </div>
+                            {/*TODO REPLACE DATAPICKER*/}
+                            {/*Наверное нужно сделать state null*/}
+                            {
+                                form.date ?
+                                <div className="input-field col s6">
+                                    {/*<input id="date" type="text" name="date" placeholder="date" className="datepicker" value={form.date} onChange={changeHandler}/>*/}
+                                    <input id="date" type="date" name="date" placeholder="date"
+                                           className="profile-input validate" value={form.date}
+                                           onChange={changeHandler}/>
+                                    {/*<input type="text" className="datepicker" />*/}
+                                    <label htmlFor="date">Date of birth</label>
+                                </div>
+                                :
+                                <div className="input-field col s6">
+                                    <input id="salary" type="text" name="salary" placeholder="salary"
+                                           className="profile-input validate" value={form.salary} onChange={changeHandler}/>
+                                    <label htmlFor="salary">Salary</label>
+                                </div>
+                            }
                         </div>
 
                         <button

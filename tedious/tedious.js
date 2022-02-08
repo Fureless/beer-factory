@@ -1,5 +1,5 @@
 const config = require("config")
-const {Connection, Request, TYPES} = require('tedious')
+const {Connection, Request} = require('tedious')
 
 const SERVER = config.get('server') || 'localhost'
 const PORT = config.get('port') || 5000
@@ -27,7 +27,9 @@ const configuration = {
     }
 }
 
-module.exports.findOne = (login, callback) => {
+// TODO ДОБАВИТЬ ОБРАБОТЧИКИ ОШИБОК
+
+module.exports.findLogin = (login, callback) => {
     let connection = new Connection(configuration)
 
     connection.on('connect', err => {
@@ -80,13 +82,10 @@ module.exports.getIdUser = (login, password, callback) => {
 
         let request = new Request(`SELECT IdUser, IsDirector FROM Users WHERE Login='${login}' AND Password='${password}'`, (err, rowCount, rows) => {
             rowCount === 0 ? callback('havent') : callback(rows[0][0].value, rows[0][1].value)
+            connection.close()
         })
 
         connection.execSql(request);
-
-        request.on("requestCompleted", () => {
-            connection.close()
-        })
     })
 
     connection.connect()
@@ -102,15 +101,11 @@ module.exports.getPosition = (idUser, callback) => {
 
         let request = new Request(`SELECT * FROM Worker JOIN Users ON Users.IdUser=Worker.IdUser WHERE Users.IdUser='${idUser}'`, (err, rowCount) => {
             rowCount === 0 ? callback('customer') : callback('worker')
+            connection.close()
         })
 
         connection.execSql(request);
-
-        request.on("requestCompleted", () => {
-            connection.close()
-        })
     })
-
     connection.connect()
 }
 
@@ -123,9 +118,6 @@ module.exports.getCatalog = callback => {
         }
 
         let request = new Request('SELECT * FROM Beer', (err, rowCount, rows) => {
-
-            //console.log(rowCount)
-            //console.log(rows)
             // TODO rows[0] ?
             callback(rows)
 
@@ -220,7 +212,25 @@ module.exports.changeStatus = (idOrder, idStatus) => {
             connection.close()
         })
 
-        connection.execSql(request);
+        connection.execSql(request)
+    })
+
+    connection.connect()
+}
+
+module.exports.changeWorker = (idOrder, idWorker) => {
+    let connection = new Connection(configuration)
+
+    connection.on('connect', err => {
+        if (err) {
+            console.log(err)
+        }
+
+        let request = new Request(`UPDATE Orders SET IdWorker=${idWorker} WHERE IdOrder=${idOrder}`, (err, rowCount, rows) => {
+            connection.close()
+        })
+
+        connection.execSql(request)
     })
 
     connection.connect()
@@ -312,5 +322,24 @@ module.exports.getWorkers = callback => {
 
         connection.execSql(request)
     })
+    connection.connect()
+}
+
+module.exports.deleteOrder = idOrder => {
+    let connection = new Connection(configuration)
+
+    connection.on('connect', err => {
+        if (err) {
+            console.log(err)
+        }
+
+        // TODO убрать лишние параметры
+        let request = new Request(`DELETE FROM Orders WHERE IdOrder=${idOrder}`, (err, rowCount, rows) => {
+            connection.close()
+        })
+
+        connection.execSql(request)
+    })
+
     connection.connect()
 }
