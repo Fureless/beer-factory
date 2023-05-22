@@ -6,9 +6,8 @@ const auth = require('../middleware/auth.middleware')
 //const {check, validationResult} = require('express-validator')
 const router = Router()
 
-const {getCatalog} = require('../tedious/tedious')
+const {getCatalog, createProduct, editProduct, deleteProduct, getBestProducts} = require('../tedious/tedious')
 
-//ПРОВЕРИТЬ ТИПЫ ДАННЫХ
 // /api/catalog
 router.get(
     '/', auth,  async (req, res) => {
@@ -21,31 +20,59 @@ router.get(
             //     })
             // }
 
-            // Проверяю авторизован ли пользователь
-            // Делаю запрос на бд и получаю весь каталог
+            // TODO А ЕСЛИ ПУСТОЙ? ОШИБКА?
             getCatalog(result => {
-                //console.log(result[0][0].value)
-                //const {IdBeer, Name, Color, Price, Degree, IsFiltration} = result
-                // console.log(IdBeer)
-                // console.log(Name)
-                // console.log(Color)
-                // console.log(Price)
-                // console.log(Degree)
-                // console.log(IsFiltration)
-                // const token = jwt.sign(
-                //     {
-                //         userId: result,
-                //         userPosition: 'director'
-                //     },
-                //     config.get('jwtSecret'),
-                //     {expiresIn: '1h'}
-                // )
-
                 res.json({result})
             })
 
-            // Отправляю каталог
+        } catch (e) {
+            res.status(500).json({message: 'Что-то пошло не так, попробуйте снова'})
+        }
+    })
 
+// /api/catalog/create
+router.post(
+    '/create', auth,  async (req, res) => {
+        try {
+            const {name, color, degree, price, isFiltration} = req.body
+            createProduct(name, color, degree, price, isFiltration)
+            res.status(201).json({message: 'Добавлено в каталог'})
+        } catch (e) {
+            res.status(500).json({message: 'Что-то пошло не так, попробуйте снова'})
+        }
+    })
+
+// /api/catalog/edit
+router.post(
+    '/edit', auth,  async (req, res) => {
+        try {
+            const {name, color, degree, price, isFiltration, idBeer} = req.body
+            editProduct(name, color, degree, price, isFiltration, idBeer)
+            res.status(202).json({message: 'Изменено'})
+        } catch (e) {
+            res.status(500).json({message: 'Что-то пошло не так, попробуйте снова'})
+        }
+    })
+
+// /api/catalog/
+router.delete(
+    '/', auth,  async (req, res) => {
+        try {
+            const {idBeer} = req.body
+            deleteProduct(idBeer)
+            res.status(202).json({message: 'Удалено'})
+        } catch (e) {
+            res.status(500).json({message: 'Что-то пошло не так, попробуйте снова'})
+        }
+    })
+
+// /api/catalog/best
+router.get(
+    '/best', auth,  async (req, res) => {
+        try {
+            getBestProducts(result => {
+                res.json({result})
+            })
         } catch (e) {
             res.status(500).json({message: 'Что-то пошло не так, попробуйте снова'})
         }

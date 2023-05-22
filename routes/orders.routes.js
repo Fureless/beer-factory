@@ -2,17 +2,28 @@ const {Router} = require('express')
 const router = Router()
 const auth = require('../middleware/auth.middleware')
 
-const {getOrders, getCustomerId, createOrder, changeStatus, changeWorker, deleteOrder} = require('../tedious/tedious')
+const {getOrders, getCustomerId, createOrder, changeStatus, changeWorker, deleteOrder, getOrdersWorkers} = require('../tedious/tedious')
 
 // api/orders
 router.get(
     '/', auth, async (req, res) => {
         try {
-            // ЗАПРОС
             getOrders(req.user.userId, req.user.userPosition, result => {
                 res.json({result})
             })
+        } catch (e) {
+            res.status(500).json({message: 'Что-то пошло не так, попробуйте снова'})
+        }
+    }
+)
 
+// api/orders/workers
+router.get(
+    '/workers', auth, async (req, res) => {
+        try {
+            getOrdersWorkers(result => {
+                res.json({result})
+            })
         } catch (e) {
             res.status(500).json({message: 'Что-то пошло не так, попробуйте снова'})
         }

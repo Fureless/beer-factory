@@ -13,17 +13,18 @@ import bImg6 from '../../assets/images/beer6.jpg'
 import bImg7 from '../../assets/images/beer7.jpg'
 import bImg8 from '../../assets/images/beer8.jpg'
 import bImg9 from '../../assets/images/beer9.jpg'
-import bImg10 from '../../assets/images/beer10.jpg'
 
 export const Orders = () => {
     const [orders, setOrders] = useState(false)
     const [statuses, setStatuses] = useState(false)
     const [workers, setWorkers] = useState(false)
+    const [ordersWorkers, setOrdersWorkers] = useState(false)
+    const [newStatus, setNewStatus] = useState('')
     const auth = useContext(AuthContext)
     const message = useMessage()
     const {loading, error, request, clearError} = useHttp()
 
-    const images = [bImg1, bImg2, bImg3, bImg4, bImg5, bImg6, bImg7, bImg8, bImg9, bImg10]
+    const images = [bImg1, bImg2, bImg3, bImg4, bImg5, bImg6, bImg7, bImg8, bImg9]
 
     // TODO ВЫНЕСТИ ВСЕ ЗАПРОСЫ В ОТДЕЛЬНЫЙ ФАЙЛ
 
@@ -53,6 +54,11 @@ export const Orders = () => {
                 const workersData = await request('/api/workers', 'GET', null, {Authorization: `Bearer ${auth.token}`})
                 if (workersData.result[0][0].value) {
                     setWorkers(workersData.result)
+                }
+
+                const ordersWorkersData = await request('/api/orders/workers', 'GET', null, {Authorization: `Bearer ${auth.token}`})
+                if (ordersWorkersData.result[0][0].value) {
+                    setOrdersWorkers(ordersWorkersData.result)
                 }
             } catch (e) {
             }
@@ -92,6 +98,13 @@ export const Orders = () => {
         message(data.message)
     }
 
+    const createNewStatus = async status => {
+        const data = await request('/api/statuses/', 'POST', {
+            status: status
+        }, {Authorization: `Bearer ${auth.token}`})
+        message(data.message)
+    }
+
     useEffect(() => {
         const elems = document.querySelectorAll('select')
         M.FormSelect.init(elems, {})
@@ -102,6 +115,15 @@ export const Orders = () => {
     // TODO А ДРУГОЕ? ЕСЛИ НЕТ ДРУГОГО
     if (!orders) {
         return <div>NOT ORDERS</div>
+    }
+
+    const identifyWorker = idOrder => {
+        for (let i of ordersWorkers) {
+            if (i[0].value === idOrder) {
+                return i[1].value
+            }
+        }
+        return 'default'
     }
 
     // TODO ИЗМЕНИТЬ СТИЛИ SELECT
@@ -141,15 +163,20 @@ export const Orders = () => {
                                         <h6>Order <strong>№{++index}</strong></h6>
                                         <p>Amount: <strong>{order[4].value}</strong></p>
                                         <p>Total price: <strong>{order[5].value} RUB</strong></p>
+                                        {auth.userPosition === 'director' && <p>Customer: <strong>{order[8].value}</strong></p>}
                                         {auth.userPosition !== 'worker' && statuses.map((status, idx) => (
                                             <div key={idx}>
-                                                {status[0].value === order[6].value ?
-                                                    <p>Status: <strong>{status[1].value}</strong></p> : null}
+                                                {
+                                                    status[0].value === order[6].value &&
+                                                    <p>Status: <strong>{status[1].value}</strong></p>
+                                                }
                                             </div>
-
                                         ))}
                                         {/*TODO SHOW TIME*/}
-                                        <p>Time of order: <strong>{order[7].value.slice(0, 10)}</strong></p>
+                                        {/*<p>Time of order: <strong>{order[7].value.slice(0, 10)}</strong></p>*/}
+                                        <p>Time of
+                                            order: <strong>{order[7].value.split('T')[0] + ' ' + order[7].value.split('T')[1].slice(0, 8)}</strong>
+                                        </p>
                                     </div>
                                     <div className='col s4'>
 
@@ -178,25 +205,28 @@ export const Orders = () => {
                                                         <option value={sts[0].value} key={i}>{sts[1].value}</option>
                                                     ))}
                                                 </select>
-                                                <label>select me pls</label>
+                                                <label>current status</label>
                                                 {/* </> */}
                                             </div>
                                         }
 
                                         {
-                                            auth.userPosition === 'director' &&
+                                            auth.userPosition === 'director' && ordersWorkers &&
                                             <>
                                                 <div className="input-field">
                                                     {/*TODO СДЕЛАТЬ ТАК, ЧТО ЕСЛИ ЗАКАЗ УЖЕ ВЫПОЛНЕН/ОТМЕНЕН, ТО НЕЛЬЗЯ МЕНЯТЬ РАБОТНИКА ИЛИ САМ СТАТУС(ИЛИ НЕТ?)*/}
                                                     {/*TODO НЕ ПОКАЗЫВАТЬ МЕНЯ В СПИСКЕ*/}
-                                                    <select defaultValue={2}
+
+                                                    <select defaultValue={identifyWorker(order[0].value)}
                                                             onChange={e => changeWorker(order[0].value, e.target.value)}>
-                                                        <option value="" disabled>Choose worker of the order</option>
+                                                        <option value="default" disabled>Choose worker of the order
+                                                        </option>
                                                         {workers.map((wrk, i) => (
                                                             <option value={wrk[0].value} key={i}>{wrk[2].value}</option>
                                                         ))}
                                                     </select>
-                                                    <label>delete me pls</label>
+
+                                                    <label>current worker</label>
                                                 </div>
 
                                                 <button className="btn-large waves-effect waves-light red darken-1"
@@ -218,24 +248,34 @@ export const Orders = () => {
                 </div>
                 <div className="col s1"/>
                 <div className="col s3">
-                    <div className="row">
-                        <div className="col s12">
-                            <div className="row">
-                                <div className="input-field col s12">
-                                    <i className="material-icons prefix">textsms</i>
-                                    <input type="text" id="autocomplete-input" className="autocomplete"/>
-                                    <label htmlFor="autocomplete-input">Autocomplete</label>
-                                </div>
-                            </div>
+                    {
+                        auth.userPosition === 'director' &&
+                        <div className="valign-wrapper">
+                            <input type="text" style={{width: '200px'}} onChange={event => setNewStatus(event.target.value)}/>
+                            <button
+                                className="btn modal-trigger waves-effect waves-light blue darken-1"
+                                data-target="product-modal"
+                                // type="submit"
+                                // name="action"
+                                onClick={() => createNewStatus(newStatus)}
+                                style={{fontSize: '12px', marginLeft: '1rem', padding: '0 4px'}}
+                                disabled={loading}
+                            >status
+                                <i className="material-icons right" style={{margin: 0}}>add</i>
+                            </button>
                         </div>
-                    </div>
 
-                    <p>
-                        <label>
-                            <input type="checkbox" className="filled-in"/>
-                            <span>IsFiltration</span>
-                        </label>
-                    </p>
+                    }
+                    {/*<div className="input-field">*/}
+                    {/*    <i className="material-icons prefix">textsms</i>*/}
+                    {/*    <input type="text" id="autocomplete-input" className="autocomplete"/>*/}
+                    {/*    <label htmlFor="autocomplete-input">Autocomplete</label>*/}
+                    {/*</div>*/}
+
+                    {/*<label>*/}
+                    {/*    <input type="checkbox" className="filled-in"/>*/}
+                    {/*    <span>IsFiltration</span>*/}
+                    {/*</label>*/}
                 </div>
             </div>
         </div>

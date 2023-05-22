@@ -42,6 +42,8 @@ router.post(
             //         res.status(400).json({message: 'Пользователь с таким email уже существует'}) :
             //         res.status(201).json({message: 'Пользователь создан'})
             // })
+            //const hashedPassword = bcrypt.hash(password, 12)
+            //console.log(hashedPassword)
 
             findLogin(`${login}`, candidate => {
                 if (candidate === 'have') {
@@ -89,6 +91,15 @@ router.post('/login',
 
             const {login, password} = req.body
 
+            //const hashedPassword = bcrypt.hash(password, 12)
+            //const isMatch = await bcrypt.compare('customer100', hashedPassword)
+            //
+            // if (!isMatch) {
+            //     return res.status(400).json({message: 'Неверный пароль, попробуйте снова'})
+            // }
+            //console.log(isMatch)
+            //console.log(hashedPassword)
+
             getIdUser(`${login}`, `${password}`, (result, isDirector) => {
                 if (isDirector) {
                     //res.status(201).json({message: 'ОГО ТЫ ДИРЕКТОР'})
@@ -135,11 +146,6 @@ router.post('/login',
             })
 
             //
-            // const isMatch = await bcrypt.compare(password, user.password)
-            //
-            // if (!isMatch) {
-            //     return res.status(400).json({message: 'Неверный пароль, попробуйте снова'})
-            // }
             //
             // const token = jwt.sign(
             //     {userId: user.id},

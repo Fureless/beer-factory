@@ -64,7 +64,7 @@ export const Profile = () => {
     }, [request, auth.token, auth.userPosition])
 
     const editUserProfile = async () => {
-        const data = await request('/api/profile/edit', 'POST', {...form}, {Authorization: `Bearer ${auth.token}`})
+        const data = await request('/api/profile/', 'POST', {...form}, {Authorization: `Bearer ${auth.token}`})
         message(data.message)
     }
 
@@ -74,6 +74,7 @@ export const Profile = () => {
         history('/auth')  // ???
     }
 
+    // TODO А нужен ли Loader?
     if (form) {
         return (
             <div className="container" style={{marginTop: '3rem'}}>
@@ -122,8 +123,13 @@ export const Profile = () => {
                                 </div>
                                 :
                                 <div className="input-field col s6">
-                                    <input id="salary" type="text" name="salary" placeholder="salary"
-                                           className="profile-input validate" value={form.salary} onChange={changeHandler}/>
+                                    {auth.userPosition === 'director' ?
+                                        <input id="salary" type="text" name="salary" placeholder="salary"
+                                               className="profile-input validate" value={form.salary} onChange={changeHandler}/>
+                                        :
+                                        <input id="salary" type="text" name="salary" placeholder="salary" disabled
+                                               className="profile-input validate" value={form.salary} onChange={changeHandler}/>
+                                    }
                                     <label htmlFor="salary">Salary</label>
                                 </div>
                             }

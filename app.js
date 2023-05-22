@@ -6,7 +6,7 @@ const app = express()
 
 // TODO разделить запрос на get, post и тд?
 // middleware для того, чтобы парсить приходящие json
-app.use(express.json({extended: true}))
+app.use(express.json())
 
 app.use('/api/auth', require('./routes/auth.routes'))
 app.use('/api/catalog', require('./routes/catalog.routes'))

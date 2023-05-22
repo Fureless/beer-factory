@@ -79,6 +79,7 @@ module.exports.getIdUser = (login, password, callback) => {
         if (err) {
             console.log(err)
         }
+        console.log('PAS', password)
 
         let request = new Request(`SELECT IdUser, IsDirector FROM Users WHERE Login='${login}' AND Password='${password}'`, (err, rowCount, rows) => {
             rowCount === 0 ? callback('havent') : callback(rows[0][0].value, rows[0][1].value)
@@ -125,7 +126,55 @@ module.exports.getCatalog = callback => {
         })
         connection.execSql(request);
     })
+    connection.connect()
+}
 
+module.exports.createProduct = (name, color, degree, price, isFiltration) => {
+    let connection = new Connection(configuration)
+
+    connection.on('connect', err => {
+        if (err) {
+            console.log(err)
+        }
+
+        let request = new Request(`INSERT INTO Beer (Name, Color, Degree, Price, IsFiltration)
+            VALUES ('${name}', '${color}', '${degree}', '${price}', '${isFiltration}')`, (err, rowCount, rows) => {
+            connection.close()
+        })
+        connection.execSql(request);
+    })
+    connection.connect()
+}
+
+module.exports.editProduct = (name, color, degree, price, isFiltration, idBeer) => {
+    let connection = new Connection(configuration)
+
+    connection.on('connect', err => {
+        if (err) {
+            console.log(err)
+        }
+
+        let request = new Request(`UPDATE Beer SET Name='${name}', Color='${color}', Degree='${degree}', Price='${price}', IsFiltration='${isFiltration}' WHERE IdBeer=${idBeer}`, (err, rowCount, rows) => {
+            connection.close()
+        })
+        connection.execSql(request);
+    })
+    connection.connect()
+}
+
+module.exports.deleteProduct = idBeer => {
+    let connection = new Connection(configuration)
+
+    connection.on('connect', err => {
+        if (err) {
+            console.log(err)
+        }
+
+        let request = new Request(`DeleteBeer '${idBeer}'`, (err, rowCount, rows) => {
+            connection.close()
+        })
+        connection.execSql(request);
+    })
     connection.connect()
 }
 
@@ -153,12 +202,47 @@ module.exports.getOrders = (idUser, position, callback) => {
             })
             connection.execSql(request);
         } else {
-            let request = new Request(`SELECT * FROM Orders`, (err, rowCount, rows) => {
+            let request = new Request(`SELECT IdOrder, IdBeer, Orders.IdCustomer, Orders.IdWorker, Quantity, OrderPrice, IdStatus, OrderTime, Customers.FIO
+                                       FROM Orders LEFT JOIN Customers ON Orders.IdCustomer=Customers.IdCustomer`, (err, rowCount, rows) => {
                 callback(rows)
                 connection.close()
             })
             connection.execSql(request);
         }
+    })
+    connection.connect()
+}
+
+module.exports.getBestProducts = callback => {
+    let connection = new Connection(configuration)
+
+    connection.on('connect', err => {
+        if (err) {
+            console.log(err)
+        }
+
+        let request = new Request('SELECT * FROM Best_products ORDER BY Best_products.OverallQuantity DESC', (err, rowCount, rows) => {
+            callback(rows)
+            connection.close()
+        })
+        connection.execSql(request);
+    })
+    connection.connect()
+}
+
+module.exports.getOrdersWorkers = callback => {
+    let connection = new Connection(configuration)
+
+    connection.on('connect', err => {
+        if (err) {
+            console.log(err)
+        }
+
+        let request = new Request('SELECT Orders.IdOrder, Worker.IdWorker FROM Orders JOIN Worker ON Orders.IdWorker = Worker.IdWorker', (err, rowCount, rows) => {
+            callback(rows)
+            connection.close()
+        })
+        connection.execSql(request);
     })
     connection.connect()
 }
@@ -195,6 +279,29 @@ module.exports.createOrder = (idBeer, idCustomer, quantity) => {
         })
 
         connection.execSql(request);
+    })
+
+    connection.connect()
+}
+
+module.exports.getWorkerOrders = (idWorker, callback) => {
+    let connection = new Connection(configuration)
+
+    connection.on('connect', err => {
+        if (err) {
+            console.log(err)
+        }
+
+        let request = new Request(`SELECT Beer.Name, Orders.Quantity, Orders.OrderTime, Statuses.StatusName
+                                    FROM Orders JOIN Beer ON Orders.IdBeer = Beer.IdBeer JOIN Customers ON Orders.IdCustomer=Customers.IdCustomer JOIN Worker ON Orders.IdWorker=Worker.IdWorker
+                                    JOIN Statuses ON Orders.IdStatus=Statuses.IdStatus
+                                    WHERE Worker.IdWorker = ${idWorker}
+                                    GROUP BY Orders.Quantity, Beer.Name, Orders.OrderTime, Statuses.StatusName`, (err, rowCount, rows) => {
+            callback(rows)
+            connection.close()
+        })
+
+        connection.execSql(request)
     })
 
     connection.connect()
@@ -261,7 +368,7 @@ module.exports.getUserProfile = (idUser, position, callback) => {
     connection.connect()
 }
 
-module.exports.editUserProfile = (idUser, position, name, email, phone, date, salary, callback) => {
+module.exports.editUser = (idUser, position, name, email, phone, date, salary, callback) => {
     let connection = new Connection(configuration)
 
     connection.on('connect', err => {
@@ -289,6 +396,25 @@ module.exports.editUserProfile = (idUser, position, name, email, phone, date, sa
     connection.connect()
 }
 
+module.exports.deleteUser = idWorker => {
+    let connection = new Connection(configuration)
+
+    connection.on('connect', err => {
+        if (err) {
+            console.log(err)
+        }
+
+        let request = new Request(`DeleteWorker ${idWorker}`, (err, rowCount, rows) => {
+            if (err) {
+                console.log(err)
+            }
+            connection.close()
+        })
+        connection.execSql(request)
+    })
+    connection.connect()
+}
+
 module.exports.getStatuses = callback => {
     let connection = new Connection(configuration)
 
@@ -299,6 +425,23 @@ module.exports.getStatuses = callback => {
 
         let request = new Request('SELECT * FROM Statuses', (err, rowCount, rows) => {
             callback(rows)
+            connection.close()
+        })
+
+        connection.execSql(request)
+    })
+    connection.connect()
+}
+
+module.exports.addStatus = status => {
+    let connection = new Connection(configuration)
+
+    connection.on('connect', err => {
+        if (err) {
+            console.log(err)
+        }
+
+        let request = new Request(`INSERT INTO Statuses (StatusName) VALUES ('${status}')`, (err, rowCount, rows) => {
             connection.close()
         })
 

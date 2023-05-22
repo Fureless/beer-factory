@@ -2,7 +2,7 @@
   "server": "localhost",
   "port": 5000,
   "user": "beer",
-  "password": "beer123",
+  "password": "beer",
   "database": "BeerFactory",
   "jwtSecret": "i wanna heal, i wanna feel"
 }

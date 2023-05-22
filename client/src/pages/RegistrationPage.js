@@ -25,6 +25,7 @@ export const RegistrationPage = () => {
         window.M.updateTextFields()
     }, [])
 
+    // ПОЧЕМУ ТОЛЬКО ИМЯ
     const changeHandler = event => {
         setForm({...form, [event.target.name]: event.target.value})
     }
@@ -37,6 +38,8 @@ export const RegistrationPage = () => {
         }
     }
 
+    // TODO Сделать двухэтапную  регистрацию
+    // Сначала пользователь вводит логин и пароль, а потом уже остальное
     return (
         <div className="row">
             <div className="col s6 offset-s3">
@@ -90,7 +93,7 @@ export const RegistrationPage = () => {
                                 </div>
 
                                 <button
-                                    className="btn grey lighten-1 black-text"
+                                    className="btn yellow darken-4"
                                     onClick={registerHandler}
                                     disabled={loading}
                                 >Register
